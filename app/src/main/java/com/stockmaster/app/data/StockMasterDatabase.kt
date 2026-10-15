@@ -29,7 +29,7 @@ import com.stockmaster.app.data.entity.StockMovement
         StockMovement::class,
         AuditLog::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class StockMasterDatabase : RoomDatabase() {
@@ -52,7 +52,9 @@ abstract class StockMasterDatabase : RoomDatabase() {
                     context.applicationContext,
                     StockMasterDatabase::class.java,
                     "stockmaster_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
