@@ -1,63 +1,27 @@
-package com.stockmaster.app.data
+package com.stockmaster.app
 
-import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.stockmaster.app.data.dao.AuditLogDao
-import com.stockmaster.app.data.dao.CustomerDao
-import com.stockmaster.app.data.dao.ProductDao
-import com.stockmaster.app.data.dao.SaleDao
-import com.stockmaster.app.data.dao.SaleItemDao
-import com.stockmaster.app.data.dao.StaffDao
-import com.stockmaster.app.data.dao.StockMovementDao
-import com.stockmaster.app.data.entity.AuditLog
-import com.stockmaster.app.data.entity.Customer
-import com.stockmaster.app.data.entity.Product
-import com.stockmaster.app.data.entity.Sale
-import com.stockmaster.app.data.entity.SaleItem
-import com.stockmaster.app.data.entity.Staff
-import com.stockmaster.app.data.entity.StockMovement
+import android.app.Application
+import com.stockmaster.app.data.StockMasterDatabase
+import com.stockmaster.app.data.StockRepository
 
-@Database(
-    entities = [
-        Product::class,
-        Customer::class,
-        Sale::class,
-        SaleItem::class,
-        Staff::class,
-        StockMovement::class,
-        AuditLog::class
-    ],
-    version = 2,
-    exportSchema = false
-)
-abstract class StockMasterDatabase : RoomDatabase() {
+class StockMasterApp : Application() {
 
-    abstract fun productDao(): ProductDao
-    abstract fun customerDao(): CustomerDao
-    abstract fun saleDao(): SaleDao
-    abstract fun saleItemDao(): SaleItemDao
-    abstract fun staffDao(): StaffDao
-    abstract fun stockMovementDao(): StockMovementDao
-    abstract fun auditLogDao(): AuditLogDao
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+    }
+
+    // by lazy = built only when first needed, then shared forever
+    val database: StockMasterDatabase by lazy {
+        StockMasterDatabase.getDatabase(this)
+    }
+
+    val repository: StockRepository by lazy {
+        StockRepository(database)
+    }
 
     companion object {
-        @Volatile
-        private var INSTANCE: StockMasterDatabase? = null
-
-        fun getDatabase(context: Context): StockMasterDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    StockMasterDatabase::class.java,
-                    "stockmaster_database"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
-                INSTANCE = instance
-                instance
-            }
-        }
+        lateinit var instance: StockMasterApp
+            private set
     }
 }
