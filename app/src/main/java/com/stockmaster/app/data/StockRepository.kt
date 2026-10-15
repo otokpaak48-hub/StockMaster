@@ -40,7 +40,7 @@ class StockRepository(private val db: StockMasterDatabase) {
 
     suspend fun restock(productId: Long, qty: Int, reason: String = "Restock") =
         withContext(Dispatchers.IO) {
-            val product = productDao().getProductById(productId) ?: return@withContext
+            val product = products.getProductById(productId) ?: return@withContext
             products.adjustStock(productId, qty)
             movements.insertMovement(
                 StockMovement(
