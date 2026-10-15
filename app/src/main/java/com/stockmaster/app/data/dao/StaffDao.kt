@@ -22,6 +22,14 @@ interface StaffDao {
     @Query("SELECT * FROM staff WHERE id = :staffId")
     suspend fun getStaffById(staffId: Long): Staff?
 
-    @Query("SELECT * FROM staff WHERE pin = :pin LIMIT 1")
-    suspend fun getStaffByPin(pin: String): Staff?
+    @Query("SELECT * FROM staff WHERE name = :name")
+    suspend fun getStaffByName(name: String): Staff?
+
+    // One-shot roster for hash-based login (no Flow needed)
+    @Query("SELECT * FROM staff")
+    suspend fun getAllStaffOnce(): List<Staff>
+
+    // Seeder checks this before forging Admin
+    @Query("SELECT COUNT(*) FROM staff")
+    suspend fun countStaff(): Int
 }
