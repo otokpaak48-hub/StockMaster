@@ -9,7 +9,8 @@ data class Staff(
     val name: String,
     val role: String = "CASHIER",
     val phone: String = "",
-    val pin: String = "0000",
+    val salt: String = "",
+    val pin: String = "",
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis()
 )
