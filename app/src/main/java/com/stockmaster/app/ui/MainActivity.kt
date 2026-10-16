@@ -2,10 +2,15 @@ package com.stockmaster.app.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.google.android.material.tabs.TabLayoutMediator
+import com.stockmaster.app.R
 import com.stockmaster.app.data.Session
 import com.stockmaster.app.databinding.ActivityMainBinding
 import com.stockmaster.app.ui.dashboard.DashboardFragment
@@ -13,15 +18,6 @@ import com.stockmaster.app.ui.dashboard.DashboardFragment
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
-    // Tab 1 is real, the rest are signposts until their batches arrive
-    private val tabs = listOf(
-        "Dashboard" to 1,
-        "Sales" to 2,
-        "Inventory" to 3,
-        "Staff" to 4,
-        "Reports" to 5
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,15 +32,52 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
-            override fun getItemCount() = tabs.size
-            override fun createFragment(position: Int): Fragment =
-                if (position == 0) DashboardFragment()
-                else PlaceholderFragment.newInstance(tabs[position].first, tabs[position].second)
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> { show(DashboardFragment()); true }
+                R.id.nav_inventory -> { show(makePlaceholder("Stock")); true }
+                R.id.nav_sell      -> { show(makePlaceholder("Sell")); true }
+                R.id.nav_customers -> { show(makePlaceholder("Customers")); true }
+                R.id.nav_more      -> { show(makePlaceholder("More")); true }
+                else -> false
+            }
         }
 
-        TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
-            tab.text = tabs[position].first
-        }.attach()
+        // Home base on first launch
+        if (savedInstanceState == null) {
+            show(DashboardFragment())
+        }
+    }
+
+    private fun show(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
+    }
+
+    // Signpost screen until its real batch arrives — built in code, needs no XML
+    private fun makePlaceholder(title: String): Fragment {
+        return object : Fragment() {
+            override fun onCreateView(
+                inflater: LayoutInflater,
+                container: ViewGroup?,
+                savedInstanceState: Bundle?
+            ): View {
+                val root = FrameLayout(requireContext())
+                val label = TextView(requireContext())
+                label.text = "$title 🚧 under construction — arrives in a future batch"
+                label.textSize = 18f
+                label.gravity = Gravity.CENTER
+                root.addView(
+                    label,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        Gravity.CENTER
+                    )
+                )
+                return root
+            }
+        }
     }
 }
