@@ -49,6 +49,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Dashboard's quick-action buttons land here: flip the nav switch, the listener does the rest
+    fun navigateTo(itemId: Int) {
+        binding.bottomNav.selectedItemId = itemId
+    }
+
     private fun show(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
